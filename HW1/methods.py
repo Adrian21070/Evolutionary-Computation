@@ -1,6 +1,15 @@
 
 import numpy as np
 
+def compute_gradient(x, y, f, constraint):
+    dx, dy = 1e-4, 1e-4
+
+    df_dx = (f([x + dx, y], constraint) - f([x - dx, y], constraint)) / (2*dx)
+    df_dy = (f([x, y + dy], constraint) - f([x, y - dy], constraint)) / (2*dy)
+
+    return np.array([df_dx, df_dy])
+
+
 def hill_climbing(initial_solution, step_size, max_iterations,
                   num_neighbors, function, constraint):
     
@@ -44,3 +53,55 @@ def hill_climbing(initial_solution, step_size, max_iterations,
             break
 
     return current_solution, function(current_solution, constraint)
+
+
+def gradient_descent(initial_solution, step_size, f, constraint, tolerance):
+    
+    x = np.array(initial_solution)
+
+    c1 = 1e-4
+    c2 = 0.9
+
+    while norm(compute_gradient(*x, f, constraint)) > tolerance:
+        # Compute a search direction
+        grad = compute_gradient(*x, f, constraint)
+        p = -grad
+
+        # Compute step size (wolfe conditions)
+        # 0 < c1 < c2 < 1, c1 = 10^-4, c2 = 0.9
+        # f(x + alpha*p) <= f(x) + c1*alpha*gradient(f)*p
+        # gradient(f(x + alpha*p))*p >= c2*gradient(f)*p
+        step_size = wolfe_conditions(f, x, p, grad, step_size, constraint)
+
+        x = x + step_size * p
+    
+    return x, f(x, constraint)
+
+def armijo_condition(f, point, alpha, p, grad, constraint, c1=1e-4):
+    new_point = point + alpha * p
+    return f(new_point, constraint) <= f(point, constraint) + c1 * alpha * np.dot(grad, p)
+    #return f([x + alpha * p[0], y + alpha * p[1]], constraint) <= f([x,y]) + c1 * alpha * np.dot(grad, p)
+
+def curvature_condition(grad_new, p, grad, c2=0.9):
+    return np.dot(grad_new, p) >= c2 * np.dot(grad, p)
+
+def wolfe_conditions(f, point, p, prev_grad, step_size, constraint, c1=1e-4, c2=0.9):
+    
+    flag = False
+
+    while not(flag):
+        
+        grad_new = compute_gradient(point[0] + step_size*p[0], point[1] + step_size*p[1], f, constraint)
+
+        if not(armijo_condition(f, point, step_size, p=p, grad=prev_grad, constraint=constraint)):
+            step_size /= 2
+        elif not(curvature_condition(grad_new, p, prev_grad)):
+            step_size *= 2
+        else:
+            flag = True
+    
+    return step_size
+
+def norm(point: list) -> float:
+
+    return sum([x**2 for x in point])**0.5
