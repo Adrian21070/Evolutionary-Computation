@@ -20,10 +20,15 @@ def constraints(solution: list, constraint: list) -> bool:
     return False
 
 
-def function_1(point, constraint) -> float:
+def function_1(point, constraint, is_numpy=False) -> float:
 
     # Unpack items
     x1, x2 = point
+
+    if is_numpy:
+        # Avoid constraints
+        f = -2*(x1**2) + 3*x1*x2 - 1.5*(x2**2) - 1.3
+        return -f
 
     if constraints(point, constraint):
         # Function one needs to be multiplied by -1
@@ -35,10 +40,17 @@ def function_1(point, constraint) -> float:
         return float("inf")
 
 
-def function_2(point, constraint) -> float:
+def function_2(point, constraint, is_numpy=False) -> float:
 
     # Unpack items
     x1, x2 = point
+
+    if is_numpy:
+        # Avoid constraints
+        f = (4 - 2.1*(x1**2) + (x1**4)/3)*(x1**2) \
+            + x1*x2 + (-4 + 4*(x2**2))*(x2**2)
+        
+        return f
 
     if constraints(point, constraint):
         f = (4 - 2.1*(x1**2) + (x1**4)/3)*(x1**2) \
@@ -49,13 +61,20 @@ def function_2(point, constraint) -> float:
         return float("inf")
     
 
-def function_3(point, constraint) -> float:
+def function_3(point, constraint, is_numpy=False) -> float:
 
     # Unpack items
     x1, x2 = point
 
+    A = 10
+
+    if is_numpy:
+        # Avoid constraints
+        f = A + sum([x**2 - A*np.cos(2*np.pi*x) for x in [x1,x2]])
+
+        return f
+
     if constraints(point, constraint):
-        A = 10
         f = A + sum([x**2 - A*np.cos(2*np.pi*x) for x in [x1,x2]])
         
         return f

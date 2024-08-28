@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from methods import hill_climbing, gradient_descent, newton
 from functions import function_1, function_2, function_3
-import os
+
 
 def plot_contour(f, constraints):
     x = np.linspace(constraints[0][0], constraints[0][1], 100)
@@ -14,7 +14,7 @@ def plot_contour(f, constraints):
 
     X, Y = np.meshgrid(x,y)
 
-    Z = f([X,Y], constraint)
+    Z = f([X,Y], constraint, is_numpy=True)
 
     plt.contour(X,Y,Z, levels=20)
     plt.pause(0.1)
@@ -36,34 +36,46 @@ if __name__ == "__main__":
     ### Initial solution = [-2, 2]
     ### constraints = [[-5.12,5.12], [-5.12,5.12]]
 
-    f = function_1
+    functions = [function_1, function_2, function_3]
+    initial_solutions = [[-4, 4], [0.5, 1], [-2, 2]]
+    constraints = [[[-6,6],[-6,6]], [[-3,3],[-2,2]], [[-5.12,5.12],[-5.12,5.12]]]
 
-    # Get first derivative
-    #x, y = symbols('x y')
-    #f_expr = -(-2*(x**2) + 3*x*y - 1.5*(y**2) - 1.3)
-    #f_prime = lambdify([x, y], [f_expr.diff(x), f_expr.diff(y)], 'numpy')
+    for i, function in enumerate(functions):
+        
+        # Parameters
+        initial_solution = initial_solutions[i]
 
-    # Parameters
-    initial_solution = [0.5,1]
-    constraint = [[-3,3],[-2,2]]
+        constraint = constraints[i]
 
-    # Display graphic
-    #ax = plot_contour(f, constraint)
-    
-    best_solution, value = hill_climbing(initial_solution, step_size=0.1, 
-                                        max_iterations=1000, num_neighbors=4,
-                                        function=f, constraint=constraint)
-    print(best_solution)
-    print(value)
+        print(f"Function {i}")
 
-    best_solution, value = gradient_descent(initial_solution, step_size=0.001,
-                                            f=f, constraint=constraint, tolerance=0.1)
-    print(best_solution)
-    print(value)
+        # Display graph
+        ax = plot_contour(function, constraint)
 
-    best_solution, value = newton(initial_solution, step_size=0.001,
-                                            f=f, constraint=constraint, tolerance=0.1)
-    print(best_solution)
-    print(value)
+        # HILL CLIMBING
+        best_solution, value = hill_climbing(initial_solution, step_size=0.05,
+                                             max_iterations=1000, num_neighbors=8,
+                                             function=function, constraint=constraint,
+                                             ax=ax)
+        
+        print("Hill Climbing")
+        print("Solution: ", best_solution, "Function: ", value, "\n")
 
-    plt.show()
+        # GRADIENT DESCENT
+        best_solution, value = gradient_descent(initial_solution, step_size=0.001,
+                                                f=function, constraint=constraint,
+                                                tolerance=0.001, ax=ax)
+
+        print("Gradient Descent")
+        print("Solution: ", best_solution, "Function: ", value, "\n")
+
+        # NEWTON
+        best_solution, value = newton(initial_solution, step_size=0.001,
+                                        f=function, constraint=constraint,
+                                        tolerance=0.1, ax=ax)
+        
+        print("Newton Method")
+        print("Solution: ", best_solution, "Function: ", value, "\n")
+
+        plt.pause(5)
+        plt.clf()

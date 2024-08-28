@@ -1,8 +1,9 @@
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 def compute_gradient(x, y, f, constraint):
-    dx, dy = 1e-4, 1e-4
+    dx, dy = 1e-5, 1e-5
 
     df_dx = (f([x + dx, y], constraint) - f([x - dx, y], constraint)) / (2*dx)
     df_dy = (f([x, y + dy], constraint) - f([x, y - dy], constraint)) / (2*dy)
@@ -10,7 +11,7 @@ def compute_gradient(x, y, f, constraint):
     return np.array([df_dx, df_dy])
 
 def compute_secondGradient(x, y, f, constraint):
-    dx, dy = 1e-4, 1e-4
+    dx, dy = 1e-5, 1e-5
 
     df_dxdx = (f([x + dx, y], constraint) - 2*f([x, y], constraint) + f([x - dx, y], constraint)) / (dx**2)
     df_dydy = (f([x, y + dy], constraint) - 2*f([x, y], constraint) + f([x, y - dy], constraint)) / (dy**2)
@@ -20,11 +21,14 @@ def compute_secondGradient(x, y, f, constraint):
     return np.array([[df_dxdx, df_dxdy], [df_dydx, df_dydy]])
 
 def hill_climbing(initial_solution, step_size, max_iterations,
-                  num_neighbors, function, constraint):
+                  num_neighbors, function, constraint, ax):
     
     # Evaluate initial solution
     current_solution = initial_solution
     f = function(current_solution, constraint)
+
+    # Plot current solution
+    ax.scatter(current_solution[0], current_solution[1], c="r")
 
     for _ in range(max_iterations):
 
@@ -57,19 +61,29 @@ def hill_climbing(initial_solution, step_size, max_iterations,
         # Verify if a neighbor is better than current solution
         if function(best_neighbor, constraint) < function(current_solution, constraint):
             current_solution = best_neighbor
+            ax.scatter(current_solution[0], current_solution[1], c="r")
 
         else:
             break
+    
+        plt.pause(0.1)
+
+    ax.scatter(current_solution[0], current_solution[1], c="r")
+    plt.pause(0.1)
 
     return current_solution, function(current_solution, constraint)
 
 
-def gradient_descent(initial_solution, step_size, f, constraint, tolerance):
+def gradient_descent(initial_solution, step_size, f, constraint, tolerance, ax):
     
     x = np.array(initial_solution)
 
+    ax.scatter(x[0], x[1], c="b")
+
     c1 = 1e-4
     c2 = 0.9
+
+    cont = 0
 
     while norm(compute_gradient(*x, f, constraint)) > tolerance:
         # Compute a search direction
@@ -83,7 +97,13 @@ def gradient_descent(initial_solution, step_size, f, constraint, tolerance):
         step_size = wolfe_conditions(f, x, p, grad, step_size, constraint)
 
         x = x + step_size * p
-    
+
+        if cont % 2 == 0:
+            ax.scatter(x[0], x[1], c="b")
+            plt.pause(0.1)
+            
+        cont += 1
+
     return x, f(x, constraint)
 
 def armijo_condition(f, point, alpha, p, grad, constraint, c1=1e-4):
@@ -115,9 +135,13 @@ def norm(point: list) -> float:
 
     return sum([x**2 for x in point])**0.5
 
-def newton(initial_solution, step_size, f, constraint, tolerance):
+def newton(initial_solution, step_size, f, constraint, tolerance, ax):
     
     x = np.array(initial_solution)
+
+    ax.scatter(x[0], x[1], c="g")
+
+    cont = 0
 
     while norm(compute_gradient(*x, f, constraint)) > tolerance:
         # Compute a search direction
@@ -133,5 +157,11 @@ def newton(initial_solution, step_size, f, constraint, tolerance):
         step_size = wolfe_conditions(f, x, p, firstDerivative, step_size, constraint)
 
         x = x + step_size * p
-    
+
+        if cont % 2 == 0:
+            ax.scatter(x[0], x[1], c="g")
+            plt.pause(0.1)
+
+        cont += 1
+
     return x, f(x, constraint)
