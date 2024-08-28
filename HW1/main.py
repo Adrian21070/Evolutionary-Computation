@@ -4,9 +4,9 @@ Structure of the project.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from methods import hill_climbing, gradient_descent#, newton
+from methods import hill_climbing, gradient_descent, newton
 from functions import function_1, function_2, function_3
-
+import os
 
 def plot_contour(f, constraints):
     x = np.linspace(constraints[0][0], constraints[0][1], 100)
@@ -53,10 +53,16 @@ if __name__ == "__main__":
     best_solution, value = hill_climbing(initial_solution, step_size=0.1, 
                                         max_iterations=1000, num_neighbors=4,
                                         function=f, constraint=constraint)
+    print(best_solution)
+    print(value)
 
     best_solution, value = gradient_descent(initial_solution, step_size=0.001,
                                             f=f, constraint=constraint, tolerance=0.1)
+    print(best_solution)
+    print(value)
 
+    best_solution, value = newton(initial_solution, step_size=0.001,
+                                            f=f, constraint=constraint, tolerance=0.1)
     print(best_solution)
     print(value)
 

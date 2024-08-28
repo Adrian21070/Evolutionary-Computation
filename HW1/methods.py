@@ -9,6 +9,15 @@ def compute_gradient(x, y, f, constraint):
 
     return np.array([df_dx, df_dy])
 
+def compute_secondGradient(x, y, f, constraint):
+    dx, dy = 1e-4, 1e-4
+
+    df_dxdx = (f([x + dx, y], constraint) - 2*f([x, y], constraint) + f([x - dx, y], constraint)) / (dx**2)
+    df_dydy = (f([x, y + dy], constraint) - 2*f([x, y], constraint) + f([x, y - dy], constraint)) / (dy**2)
+    df_dxdy = (f([x + dx, y + dx], constraint) - f([x + dx, y - dx], constraint) - f([x - dx, y + dx], constraint) + f([x - dx, y - dx], constraint)) / 4*(dx**2)
+    df_dydx = (f([x + dy, y + dy], constraint) - f([x + dy, y - dy], constraint) - f([x - dy, y + dy], constraint) + f([x - dy, y - dy], constraint)) / 4*(dy**2)
+    
+    return np.array([[df_dxdx, df_dxdy], [df_dydx, df_dydy]])
 
 def hill_climbing(initial_solution, step_size, max_iterations,
                   num_neighbors, function, constraint):
@@ -105,3 +114,24 @@ def wolfe_conditions(f, point, p, prev_grad, step_size, constraint, c1=1e-4, c2=
 def norm(point: list) -> float:
 
     return sum([x**2 for x in point])**0.5
+
+def newton(initial_solution, step_size, f, constraint, tolerance):
+    
+    x = np.array(initial_solution)
+
+    while norm(compute_gradient(*x, f, constraint)) > tolerance:
+        # Compute a search direction
+        firstDerivative = compute_gradient(*x, f, constraint)
+        secondDerivative = compute_secondGradient(*x, f, constraint)
+
+        p = - np.matmul(np.linalg.inv(secondDerivative), firstDerivative)
+        
+        # Compute step size (wolfe conditions)
+        # 0 < c1 < c2 < 1, c1 = 10^-4, c2 = 0.9
+        # f(x + alpha*p) <= f(x) + c1*alpha*gradient(f)*p
+        # gradient(f(x + alpha*p))*p >= c2*gradient(f)*p
+        step_size = wolfe_conditions(f, x, p, firstDerivative, step_size, constraint)
+
+        x = x + step_size * p
+    
+    return x, f(x, constraint)
