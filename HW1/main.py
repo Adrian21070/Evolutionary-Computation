@@ -27,19 +27,23 @@ if __name__ == "__main__":
     ## function 1:
     ### Initial solution =[-4, 4]
     ### constraints = [[-6,6], [-6,6]]
+    ### Optimal value = [0, 0]
 
     ## function 2:
     ### Initial solution = [0.5, 1]
     ### constraints = [[-3,3], [-2,2]]
+    ### Optimal value = [0.0898, -0.7126]
 
     ## function 3:
     ### Initial solution = [-2, 2]
     ### constraints = [[-5.12,5.12], [-5.12,5.12]]
+    ### Optimal value = [0, 0]
 
     functions = [function_1, function_2, function_3]
     initial_solutions = [[-4, 4], [0.5, 1], [-2, 2]]
     constraints = [[[-6,6],[-6,6]], [[-3,3],[-2,2]], [[-5.12,5.12],[-5.12,5.12]]]
-
+    optimalValues = [[0, 0], [0.0898, -0.7126], [0, 0]]
+    
     for i, function in enumerate(functions):
         
         # Parameters
@@ -53,29 +57,33 @@ if __name__ == "__main__":
         ax = plot_contour(function, constraint)
 
         # HILL CLIMBING
-        best_solution, value = hill_climbing(initial_solution, step_size=0.05,
+        best_solution, value, iter = hill_climbing(initial_solution, step_size=0.05,
                                              max_iterations=1000, num_neighbors=8,
                                              function=function, constraint=constraint,
                                              ax=ax)
-        
+        error = np.sqrt((best_solution[0] - optimalValues[i][0])**2 + (best_solution[1] - optimalValues[i][1])**2)
+
         print("Hill Climbing")
-        print("Solution: ", best_solution, "Function: ", value, "\n")
+        print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "\n\n")
 
         # GRADIENT DESCENT
-        best_solution, value = gradient_descent(initial_solution, step_size=0.001,
+        best_solution, value, iter = gradient_descent(initial_solution, step_size=0.001,
                                                 f=function, constraint=constraint,
                                                 tolerance=0.001, ax=ax)
+        error = np.sqrt((best_solution[0] - optimalValues[i][0])**2 + (best_solution[1] - optimalValues[i][1])**2)
 
         print("Gradient Descent")
-        print("Solution: ", best_solution, "Function: ", value, "\n")
+        print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "\n\n")
 
         # NEWTON
-        best_solution, value = newton(initial_solution, step_size=0.001,
+        best_solution, value, iter = newton(initial_solution, step_size=0.01,
                                         f=function, constraint=constraint,
                                         tolerance=0.1, ax=ax)
-        
+        error = np.sqrt((best_solution[0] - optimalValues[i][0])**2 + (best_solution[1] - optimalValues[i][1])**2)
+
         print("Newton Method")
-        print("Solution: ", best_solution, "Function: ", value, "\n")
+        print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "\n\n")
+        
 
         plt.pause(5)
         plt.clf()
