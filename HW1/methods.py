@@ -23,6 +23,8 @@ def compute_secondGradient(x, y, f, constraint):
 def hill_climbing(initial_solution, step_size, max_iterations,
                   num_neighbors, function, constraint, ax):
     
+    cont = 0
+
     # Evaluate initial solution
     current_solution = initial_solution
     f = function(current_solution, constraint)
@@ -58,6 +60,8 @@ def hill_climbing(initial_solution, step_size, max_iterations,
                 best_value = f
                 best_neighbor = neighbor
 
+        cont += 1
+
         # Verify if a neighbor is better than current solution
         if function(best_neighbor, constraint) < function(current_solution, constraint):
             current_solution = best_neighbor
@@ -71,7 +75,7 @@ def hill_climbing(initial_solution, step_size, max_iterations,
     ax.scatter(current_solution[0], current_solution[1], c="r")
     plt.pause(0.1)
 
-    return current_solution, function(current_solution, constraint)
+    return current_solution, function(current_solution, constraint), cont
 
 
 def gradient_descent(initial_solution, step_size, f, constraint, tolerance, ax):
@@ -104,7 +108,7 @@ def gradient_descent(initial_solution, step_size, f, constraint, tolerance, ax):
             
         cont += 1
 
-    return x, f(x, constraint)
+    return x, f(x, constraint), cont
 
 def armijo_condition(f, point, alpha, p, grad, constraint, c1=1e-4):
     new_point = point + alpha * p
@@ -164,4 +168,4 @@ def newton(initial_solution, step_size, f, constraint, tolerance, ax):
 
         cont += 1
 
-    return x, f(x, constraint)
+    return x, f(x, constraint), cont
