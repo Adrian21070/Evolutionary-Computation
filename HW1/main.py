@@ -43,10 +43,6 @@ if __name__ == "__main__":
     initial_solutions = [[-4, 4], [0.5, 1], [-2, 2]]
     constraints = [[[-6,6],[-6,6]], [[-3,3],[-2,2]], [[-5.12,5.12],[-5.12,5.12]]]
 
-    functions = [functions[-1]]
-    initial_solutions = [initial_solutions[-1]]
-    constraints = [constraints[-1]]
-
     optimalValues = [[0, 0], [0.0898, -0.7126], [0, 0]]
     
     for i, function in enumerate(functions):
@@ -73,14 +69,14 @@ if __name__ == "__main__":
         print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "\n\n")
 
         # GRADIENT DESCENT
-        best_solution, value, iter = gradient_descent(initial_solution, step_size=0.5,
+        best_solution, value, iter, countGradients = gradient_descent(initial_solution, step_size=0.5,
                                                 f=function, constraint=constraint,
                                                 tolerance=0.001, ax=ax)
         
         error = np.sqrt((best_solution[0] - optimalValues[i][0])**2 + (best_solution[1] - optimalValues[i][1])**2)
 
         print("Gradient Descent")
-        print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "\n\n")
+        print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "num_Gradients: ", countGradients, "\n\n")
 
         # NEWTON
         best_solution, value, iter = newton(initial_solution, step_size=0.01,

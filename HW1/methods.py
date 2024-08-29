@@ -88,17 +88,19 @@ def gradient_descent(initial_solution, step_size, f, constraint, tolerance, ax):
     c2 = 0.9
 
     cont = 0
+    countGradients = 0
 
     while norm(compute_gradient(*x, f, constraint)) > tolerance:
         # Compute a search direction
         grad = compute_gradient(*x, f, constraint)
         p = -grad
+        countGradients += 1
 
         # Compute step size (wolfe conditions)
         # 0 < c1 < c2 < 1, c1 = 10^-4, c2 = 0.9
         # f(x + alpha*p) <= f(x) + c1*alpha*gradient(f)*p
         # gradient(f(x + alpha*p))*p >= c2*gradient(f)*p
-        step_size = wolfe_conditions(f, x, p, grad, step_size, constraint)
+        step_size, countGradients = wolfe_conditions(f, x, p, grad, step_size, constraint, countGradients)
 
         x = x + step_size * p
 
@@ -108,7 +110,7 @@ def gradient_descent(initial_solution, step_size, f, constraint, tolerance, ax):
             
         cont += 1
 
-    return x, f(x, constraint), cont
+    return x, f(x, constraint), cont, countGradients
 
 def armijo_condition(f, point, alpha, p, grad, constraint, c1=1e-4):
     new_point = point + alpha * p
@@ -118,14 +120,14 @@ def armijo_condition(f, point, alpha, p, grad, constraint, c1=1e-4):
 def curvature_condition(grad_new, p, grad, c2=0.9):
     return np.dot(grad_new, p) >= c2 * np.dot(grad, p)
 
-def wolfe_conditions(f, point, p, prev_grad, step_size, constraint, c1=1e-4, c2=0.9):
+def wolfe_conditions(f, point, p, prev_grad, step_size, constraint, countgrad, c1=1e-4, c2=0.9, ):
     
     flag = False
 
     while not(flag):
         
         grad_new = compute_gradient(point[0] + step_size*p[0], point[1] + step_size*p[1], f, constraint)
-
+        countgrad += 1
         if not(armijo_condition(f, point, step_size, p=p, grad=prev_grad, constraint=constraint)):
             step_size /= 2
         elif not(curvature_condition(grad_new, p, prev_grad)):
@@ -133,7 +135,7 @@ def wolfe_conditions(f, point, p, prev_grad, step_size, constraint, c1=1e-4, c2=
         else:
             flag = True
     
-    return step_size
+    return step_size, countgrad
 
 def norm(point: list) -> float:
 
