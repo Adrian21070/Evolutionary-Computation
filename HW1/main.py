@@ -3,6 +3,7 @@ Structure of the project.
 """
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 from methods import hill_climbing, gradient_descent, newton
 from functions import function_1, function_2, function_3
@@ -32,115 +33,102 @@ if __name__ == "__main__":
     ## function 2:
     ### Initial solution = [0.5, 1]
     ### constraints = [[-3,3], [-2,2]]
-    ### Optimal value = [0.0898, -0.7126]
+    ### Optimal value = [-0.0898, 0.7126] and [0.0898, -0.7126]
 
     ## function 3:
     ### Initial solution = [-2, 2]
     ### constraints = [[-5.12,5.12], [-5.12,5.12]]
     ### Optimal value = [0, 0]
 
+    # Group functions with their respective parameters
     functions = [function_1, function_2, function_3]
     initial_solutions = [[-4, 4], [0.5, 1], [-2, 2]]
     constraints = [[[-6,6],[-6,6]], [[-3,3],[-2,2]], [[-5.12,5.12],[-5.12,5.12]]]
 
+    # Define parameters per function per algorithm
+    step_sizes = [[0.05, 0.05, 0.05], [0.01, 0.01, 0.01], [1.0, 1.0, 1.0]]
+    tolerances = [[0, 0.001, 0.001], [0, 0.001, 0.001], [0, 0.001, 0.001]]
+    
+    # Hill Climbing exclusive
+    max_iterations = [1000, 1000, 1000]
+    num_neighbors = [4, 4, 8]
+
+    # Know optimal points
     optimalValues = [[0, 0], [-0.0898, 0.7126], [0, 0]]
     
-    function_id = 2
+    for indx, f in enumerate(functions):
 
-    functions = [functions[function_id]]
-    initial_solutions = [initial_solutions[function_id]]
-    constraints = [constraints[function_id]]
-    optimalValues = [optimalValues[function_id]]
+        # Extract parameters
+        optimal_solution = np.array(optimalValues[indx])
+        initial_solution = initial_solutions[indx]
+        constraint = constraints[indx]
 
-    step_sizes = [0.1, 0.3, 0.5, 0.7, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2]
-    step_sizes = [1.0]
-    
-    error_hill = []
-    error_gradient = []
-    error_newton = []
+        hill_step, grad_step, newton_step = step_sizes[indx]
+        _, grad_tolerance, newton_tolerance = tolerances[indx]
 
-    for step in step_sizes:
+        iterations = max_iterations[indx]
+        neighbors = num_neighbors[indx]
 
-        for i, function in enumerate(functions):
+        print(f"\nFunction {indx+1}")
 
-            # Parameters
-            initial_solution = initial_solutions[i]
+        # Display Contour
+        ax = plot_contour(f, constraint)
 
-            constraint = constraints[i]
+        # Perfrom Hill Climbing
+        hill_solution, hill_value, hill_total_iterations, hill_total_evaluations = \
+            hill_climbing(initial_solution, hill_step, iterations, 
+                                    neighbors, f, constraint, ax)
+        
+        # Compute the error
+        hill_error = np.linalg.norm(optimal_solution - np.array(hill_solution))
 
-            print(f"Function {i}")
-
-            # Display graph
-            ax = plot_contour(function, constraint)
-
-            # HILL CLIMBING
-            best_solution, value, iter, num_evals = hill_climbing(initial_solution, step_size=step,
-                                                 max_iterations=1000, num_neighbors=8,
-                                                 function=function, constraint=constraint,
-                                                 ax=ax)
-
-            error = np.sqrt((best_solution[0] - optimalValues[i][0])**2 + (best_solution[1] - optimalValues[i][1])**2)
-            error_hill.append(error)
-            print("Hill Climbing")
-            print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Evaluations: ", num_evals, "Error: ", error, "\n\n")
-
-            # GRADIENT DESCENT
-            best_solution, value, iter = gradient_descent(initial_solution, step_size=step,
-                                                    f=function, constraint=constraint,
-                                                    tolerance=0.001, ax=ax)
-
-            error = np.sqrt((best_solution[0] - optimalValues[i][0])**2 + (best_solution[1] - optimalValues[i][1])**2)
-
-            error_gradient.append(error)
-
-            print("Gradient Descent")
-            print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "\n\n")
-
-            # NEWTON
-            best_solution, value, iter = newton(initial_solution, step_size=step,
-                                            f=function, constraint=constraint,
-                                            tolerance=0.001, ax=ax)
-
-            error = np.sqrt((best_solution[0] - optimalValues[i][0])**2 + (best_solution[1] - optimalValues[i][1])**2)
-            
-            error_newton.append(error)
-
-            print("Newton Method")
-            print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "\n\n")
+        print("\nHill Climbing.")
+        print(f"Best Solution: {hill_solution}, Function value: {hill_value}, Error: {hill_error}")
+        print(f"Num iterations: {hill_total_iterations}, Num evaluations: {hill_total_evaluations}")
 
 
-            plt.pause(1)
-            plt.clf()
-    
-    plt.close()
+        # Perform Gradient Descent
+        gradient_solution, gradient_value, gradient_total_iterations, gradient_total_gradients = \
+            gradient_descent(initial_solution, grad_step, f,
+                              constraint, grad_tolerance, ax)
 
-    fig4, ax4 = plt.subplots(1,1)
-    ax4.plot(step_sizes, error_hill, marker='o')
-    ax4.set_xticks(step_sizes)
-    ax4.set_title("Hill Climbing")
+        # Compute the error
+        gradient_error = np.linalg.norm(optimal_solution - np.array(gradient_solution))
 
-    ax4.set_ylim(0,3)
-    ax4.set_xlabel("Step sizes")
-    ax4.set_ylabel("Two-Norm Error")
+        print("\nGradient Descent.")
+        print(f"Best Solution: {gradient_solution}, Function value: {gradient_value}, Error: {gradient_error}")
+        print(f"Num iterations: {gradient_total_iterations}, Num gradient computations: {gradient_total_gradients}")
 
-    fig2, ax2 = plt.subplots(1,1)
-    ax2.plot(step_sizes, error_gradient, marker='o')
-    ax2.set_xticks(step_sizes)
-    ax2.set_title("Gradient Descent")
 
-    ax2.set_ylim(0,3)
-    ax2.set_xlabel("Step sizes")
-    ax2.set_ylabel("Two-Norm Error")
+        # NEWTON
+        newton_solution, newton_value, newton_total_iterations, newton_total_gradients = \
+            newton(initial_solution, newton_step, f,
+                    constraint, newton_tolerance, ax)
 
-    fig3, ax3 = plt.subplots(1,1)
-    ax3.plot(step_sizes, error_newton, marker='o')
-    ax3.set_xticks(step_sizes)
-    ax3.set_title("Newton Method")
+        # Compute the error
+        newton_error = np.linalg.norm(optimal_solution - np.array(newton_solution))
 
-    ax3.set_ylim(0,3)
-    ax3.set_xlabel("Step sizes")
-    ax3.set_ylabel("Two-Norm Error")
+        print("\nNewton Method.")
+        print(f"Best Solution: {newton_solution}, Function value: {newton_value}, Error: {newton_error}")
+        print(f"Num iterations: {newton_total_iterations}, Num gradient computations: {newton_total_gradients}")
 
-    print(error_newton)
+        # Create legend labels
+        legend_elements = [
+                Line2D([0], [0], marker='o', color='r', label='Hill Climbing',
+                        markerfacecolor='red', markersize=10),
+                Line2D([0], [0], marker='o', color='b', label='Gradient Descent',
+                       markerfacecolor='blue', markersize=10),
+                Line2D([0], [0], marker='o', color='g', label='Newton Method',
+                       markerfacecolor='green', markersize=10)
+            ]
+        
+        # Add legend
+        ax.legend(handles=legend_elements, loc='upper right')
+        
+        # Wait for 3 seconds
+        plt.pause(5)
 
-    plt.show()
+        plt.savefig(f"Function {indx+1}.png")
+
+        # Close figure
+        plt.close()
