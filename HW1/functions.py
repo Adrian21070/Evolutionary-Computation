@@ -66,16 +66,18 @@ def function_3(point, constraint, is_numpy=False) -> float:
     # Unpack items
     x1, x2 = point
 
+    n = len(point)
+
     A = 10
 
     if is_numpy:
         # Avoid constraints
-        f = A + sum([x**2 - A*np.cos(2*np.pi*x) for x in [x1,x2]])
+        f = A*n + sum([x**2 - A*np.cos(2*np.pi*x) for x in [x1,x2]])
 
         return f
 
     if constraints(point, constraint):
-        f = A + sum([x**2 - A*np.cos(2*np.pi*x) for x in [x1,x2]])
+        f = A*n + sum([x**2 - A*np.cos(2*np.pi*x) for x in [x1,x2]])
         
         return f
     else:

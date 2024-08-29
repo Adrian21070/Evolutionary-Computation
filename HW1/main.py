@@ -40,6 +40,10 @@ if __name__ == "__main__":
     initial_solutions = [[-4, 4], [0.5, 1], [-2, 2]]
     constraints = [[[-6,6],[-6,6]], [[-3,3],[-2,2]], [[-5.12,5.12],[-5.12,5.12]]]
 
+    functions = [functions[-1]]
+    initial_solutions = [initial_solutions[-1]]
+    constraints = [constraints[-1]]
+
     for i, function in enumerate(functions):
         
         # Parameters
@@ -53,8 +57,8 @@ if __name__ == "__main__":
         ax = plot_contour(function, constraint)
 
         # HILL CLIMBING
-        best_solution, value = hill_climbing(initial_solution, step_size=0.05,
-                                             max_iterations=1000, num_neighbors=8,
+        best_solution, value = hill_climbing(initial_solution, step_size=0.9,
+                                             max_iterations=100000, num_neighbors=16,
                                              function=function, constraint=constraint,
                                              ax=ax)
         
@@ -62,7 +66,7 @@ if __name__ == "__main__":
         print("Solution: ", best_solution, "Function: ", value, "\n")
 
         # GRADIENT DESCENT
-        best_solution, value = gradient_descent(initial_solution, step_size=0.001,
+        best_solution, value = gradient_descent(initial_solution, step_size=0.5,
                                                 f=function, constraint=constraint,
                                                 tolerance=0.001, ax=ax)
 
@@ -70,9 +74,9 @@ if __name__ == "__main__":
         print("Solution: ", best_solution, "Function: ", value, "\n")
 
         # NEWTON
-        best_solution, value = newton(initial_solution, step_size=0.001,
+        best_solution, value = newton(initial_solution, step_size=2,
                                         f=function, constraint=constraint,
-                                        tolerance=0.1, ax=ax)
+                                        tolerance=0.001, ax=ax)
         
         print("Newton Method")
         print("Solution: ", best_solution, "Function: ", value, "\n")

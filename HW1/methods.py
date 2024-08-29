@@ -154,7 +154,7 @@ def newton(initial_solution, step_size, f, constraint, tolerance, ax):
         # 0 < c1 < c2 < 1, c1 = 10^-4, c2 = 0.9
         # f(x + alpha*p) <= f(x) + c1*alpha*gradient(f)*p
         # gradient(f(x + alpha*p))*p >= c2*gradient(f)*p
-        step_size = wolfe_conditions(f, x, p, firstDerivative, step_size, constraint)
+        #step_size = wolfe_conditions(f, x, p, firstDerivative, step_size, constraint)
 
         x = x + step_size * p
 
