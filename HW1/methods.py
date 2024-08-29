@@ -23,7 +23,8 @@ def compute_secondGradient(x, y, f, constraint):
 def hill_climbing(initial_solution, step_size, max_iterations,
                   num_neighbors, function, constraint, ax):
     
-    cont = 0
+    cont_iter = 0
+    cont_evaluations = 0
 
     # Evaluate initial solution
     current_solution = initial_solution
@@ -54,18 +55,20 @@ def hill_climbing(initial_solution, step_size, max_iterations,
         for neighbor in neighbors:
             # Evaluate
             f = function(neighbor, constraint)
+            cont_evaluations += 1
 
             # Verify value
             if f < best_value:
                 best_value = f
                 best_neighbor = neighbor
 
-        cont += 1
+        cont_iter += 1
 
         # Verify if a neighbor is better than current solution
         if function(best_neighbor, constraint) < function(current_solution, constraint):
             current_solution = best_neighbor
-            ax.scatter(current_solution[0], current_solution[1], c="r")
+            if cont_iter % 2 == 0:
+                ax.scatter(current_solution[0], current_solution[1], c="r")
 
         else:
             break
@@ -75,7 +78,7 @@ def hill_climbing(initial_solution, step_size, max_iterations,
     ax.scatter(current_solution[0], current_solution[1], c="r")
     plt.pause(0.1)
 
-    return current_solution, function(current_solution, constraint), cont
+    return current_solution, function(current_solution, constraint), cont_iter, cont_evaluations
 
 
 def gradient_descent(initial_solution, step_size, f, constraint, tolerance, ax):
@@ -89,7 +92,7 @@ def gradient_descent(initial_solution, step_size, f, constraint, tolerance, ax):
 
     cont = 0
 
-    while norm(compute_gradient(*x, f, constraint)) > tolerance:
+    while norm(compute_gradient(*x, f, constraint)) > tolerance and cont < 100:
         # Compute a search direction
         grad = compute_gradient(*x, f, constraint)
         p = -grad
@@ -121,9 +124,9 @@ def curvature_condition(grad_new, p, grad, c2=0.9):
 def wolfe_conditions(f, point, p, prev_grad, step_size, constraint, c1=1e-4, c2=0.9):
     
     flag = False
-
-    while not(flag):
-        
+    cont = 0
+    while not(flag) and cont < 10:
+        cont += 1
         grad_new = compute_gradient(point[0] + step_size*p[0], point[1] + step_size*p[1], f, constraint)
 
         if not(armijo_condition(f, point, step_size, p=p, grad=prev_grad, constraint=constraint)):
@@ -147,7 +150,7 @@ def newton(initial_solution, step_size, f, constraint, tolerance, ax):
 
     cont = 0
 
-    while norm(compute_gradient(*x, f, constraint)) > tolerance:
+    while norm(compute_gradient(*x, f, constraint)) > tolerance and cont < 100:
         # Compute a search direction
         firstDerivative = compute_gradient(*x, f, constraint)
         secondDerivative = compute_secondGradient(*x, f, constraint)
@@ -158,7 +161,7 @@ def newton(initial_solution, step_size, f, constraint, tolerance, ax):
         # 0 < c1 < c2 < 1, c1 = 10^-4, c2 = 0.9
         # f(x + alpha*p) <= f(x) + c1*alpha*gradient(f)*p
         # gradient(f(x + alpha*p))*p >= c2*gradient(f)*p
-        #step_size = wolfe_conditions(f, x, p, firstDerivative, step_size, constraint)
+        step_size = wolfe_conditions(f, x, p, firstDerivative, step_size, constraint)
 
         x = x + step_size * p
 

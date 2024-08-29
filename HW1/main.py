@@ -16,7 +16,7 @@ def plot_contour(f, constraints):
 
     Z = f([X,Y], constraint, is_numpy=True)
 
-    plt.contour(X,Y,Z, levels=20)
+    plt.contour(X,Y,Z, cmap="gray", levels=20)
     plt.pause(0.1)
 
     return plt.gca()
@@ -43,55 +43,104 @@ if __name__ == "__main__":
     initial_solutions = [[-4, 4], [0.5, 1], [-2, 2]]
     constraints = [[[-6,6],[-6,6]], [[-3,3],[-2,2]], [[-5.12,5.12],[-5.12,5.12]]]
 
-    functions = [functions[-1]]
-    initial_solutions = [initial_solutions[-1]]
-    constraints = [constraints[-1]]
-
-    optimalValues = [[0, 0], [0.0898, -0.7126], [0, 0]]
+    optimalValues = [[0, 0], [-0.0898, 0.7126], [0, 0]]
     
-    for i, function in enumerate(functions):
-        
-        # Parameters
-        initial_solution = initial_solutions[i]
+    function_id = 2
 
-        constraint = constraints[i]
+    functions = [functions[function_id]]
+    initial_solutions = [initial_solutions[function_id]]
+    constraints = [constraints[function_id]]
+    optimalValues = [optimalValues[function_id]]
 
-        print(f"Function {i}")
+    step_sizes = [0.1, 0.3, 0.5, 0.7, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2]
+    step_sizes = [1.0]
+    
+    error_hill = []
+    error_gradient = []
+    error_newton = []
 
-        # Display graph
-        ax = plot_contour(function, constraint)
+    for step in step_sizes:
 
-        # HILL CLIMBING
-        best_solution, value, iter = hill_climbing(initial_solution, step_size=0.9,
-                                             max_iterations=100000, num_neighbors=16,
-                                             function=function, constraint=constraint,
-                                             ax=ax)
-        
-        error = np.sqrt((best_solution[0] - optimalValues[i][0])**2 + (best_solution[1] - optimalValues[i][1])**2)
+        for i, function in enumerate(functions):
 
-        print("Hill Climbing")
-        print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "\n\n")
+            # Parameters
+            initial_solution = initial_solutions[i]
 
-        # GRADIENT DESCENT
-        best_solution, value, iter = gradient_descent(initial_solution, step_size=0.5,
-                                                f=function, constraint=constraint,
-                                                tolerance=0.001, ax=ax)
-        
-        error = np.sqrt((best_solution[0] - optimalValues[i][0])**2 + (best_solution[1] - optimalValues[i][1])**2)
+            constraint = constraints[i]
 
-        print("Gradient Descent")
-        print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "\n\n")
+            print(f"Function {i}")
 
-        # NEWTON
-        best_solution, value, iter = newton(initial_solution, step_size=0.01,
-                                        f=function, constraint=constraint,
-                                        tolerance=0.1, ax=ax)
-        
-        error = np.sqrt((best_solution[0] - optimalValues[i][0])**2 + (best_solution[1] - optimalValues[i][1])**2)
+            # Display graph
+            ax = plot_contour(function, constraint)
 
-        print("Newton Method")
-        print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "\n\n")
-        
+            # HILL CLIMBING
+            best_solution, value, iter, num_evals = hill_climbing(initial_solution, step_size=step,
+                                                 max_iterations=1000, num_neighbors=8,
+                                                 function=function, constraint=constraint,
+                                                 ax=ax)
 
-        plt.pause(5)
-        plt.clf()
+            error = np.sqrt((best_solution[0] - optimalValues[i][0])**2 + (best_solution[1] - optimalValues[i][1])**2)
+            error_hill.append(error)
+            print("Hill Climbing")
+            print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Evaluations: ", num_evals, "Error: ", error, "\n\n")
+
+            # GRADIENT DESCENT
+            best_solution, value, iter = gradient_descent(initial_solution, step_size=step,
+                                                    f=function, constraint=constraint,
+                                                    tolerance=0.001, ax=ax)
+
+            error = np.sqrt((best_solution[0] - optimalValues[i][0])**2 + (best_solution[1] - optimalValues[i][1])**2)
+
+            error_gradient.append(error)
+
+            print("Gradient Descent")
+            print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "\n\n")
+
+            # NEWTON
+            best_solution, value, iter = newton(initial_solution, step_size=step,
+                                            f=function, constraint=constraint,
+                                            tolerance=0.001, ax=ax)
+
+            error = np.sqrt((best_solution[0] - optimalValues[i][0])**2 + (best_solution[1] - optimalValues[i][1])**2)
+            
+            error_newton.append(error)
+
+            print("Newton Method")
+            print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "\n\n")
+
+
+            plt.pause(1)
+            plt.clf()
+    
+    plt.close()
+
+    fig4, ax4 = plt.subplots(1,1)
+    ax4.plot(step_sizes, error_hill, marker='o')
+    ax4.set_xticks(step_sizes)
+    ax4.set_title("Hill Climbing")
+
+    ax4.set_ylim(0,3)
+    ax4.set_xlabel("Step sizes")
+    ax4.set_ylabel("Two-Norm Error")
+
+    fig2, ax2 = plt.subplots(1,1)
+    ax2.plot(step_sizes, error_gradient, marker='o')
+    ax2.set_xticks(step_sizes)
+    ax2.set_title("Gradient Descent")
+
+    ax2.set_ylim(0,3)
+    ax2.set_xlabel("Step sizes")
+    ax2.set_ylabel("Two-Norm Error")
+
+    fig3, ax3 = plt.subplots(1,1)
+    ax3.plot(step_sizes, error_newton, marker='o')
+    ax3.set_xticks(step_sizes)
+    ax3.set_title("Newton Method")
+
+    ax3.set_ylim(0,3)
+    ax3.set_xlabel("Step sizes")
+    ax3.set_ylabel("Two-Norm Error")
+
+    print(error_newton)
+
+    plt.show()
