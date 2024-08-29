@@ -3,6 +3,7 @@ Structure of the project.
 """
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 from methods import hill_climbing, gradient_descent, newton
 from functions import function_1, function_2, function_3
@@ -32,7 +33,7 @@ if __name__ == "__main__":
     ## function 2:
     ### Initial solution = [0.5, 1]
     ### constraints = [[-3,3], [-2,2]]
-    ### Optimal value = [0.0898, -0.7126]
+    ### Optimal value = [-0.0898, 0.7126] and [0.0898, -0.7126]
 
     ## function 3:
     ### Initial solution = [-2, 2]
@@ -42,8 +43,13 @@ if __name__ == "__main__":
     functions = [function_1, function_2, function_3]
     initial_solutions = [[-4, 4], [0.5, 1], [-2, 2]]
     constraints = [[[-6,6],[-6,6]], [[-3,3],[-2,2]], [[-5.12,5.12],[-5.12,5.12]]]
-
-    optimalValues = [[0, 0], [0.0898, -0.7126], [0, 0]]
+    optimalValues = [[0, 0], [-0.0898, 0.7126], [0, 0]]
+    
+    function_id = 2
+    functions = [functions[function_id]]
+    initial_solutions = [initial_solutions[function_id]]
+    constraints = [constraints[function_id]]
+    optimalValues = [optimalValues[function_id]]
     
     for i, function in enumerate(functions):
         
@@ -58,8 +64,8 @@ if __name__ == "__main__":
         ax = plot_contour(function, constraint)
 
         # HILL CLIMBING
-        best_solution, value, iter = hill_climbing(initial_solution, step_size=0.9,
-                                             max_iterations=100000, num_neighbors=16,
+        best_solution, value, iter = hill_climbing(initial_solution, step_size=1.0,
+                                             max_iterations=1000, num_neighbors=4,
                                              function=function, constraint=constraint,
                                              ax=ax)
         
@@ -69,7 +75,7 @@ if __name__ == "__main__":
         print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "\n\n")
 
         # GRADIENT DESCENT
-        best_solution, value, iter, countGradients = gradient_descent(initial_solution, step_size=0.5,
+        best_solution, value, iter, countGradients = gradient_descent(initial_solution, step_size=1.0,
                                                 f=function, constraint=constraint,
                                                 tolerance=0.001, ax=ax)
         
@@ -79,15 +85,24 @@ if __name__ == "__main__":
         print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "num_Gradients: ", countGradients, "\n\n")
 
         # NEWTON
-        best_solution, value, iter = newton(initial_solution, step_size=0.01,
+        best_solution, value, iter, countGradients = newton(initial_solution, step_size=1.0,
                                         f=function, constraint=constraint,
-                                        tolerance=0.1, ax=ax)
+                                        tolerance=0.001, ax=ax)
         
         error = np.sqrt((best_solution[0] - optimalValues[i][0])**2 + (best_solution[1] - optimalValues[i][1])**2)
 
         print("Newton Method")
-        print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "\n\n")
+        print("Solution: ", best_solution, "Function: ", value, "Iterations: ", iter, "Error: ", error, "num_Gradients: ", countGradients, "\n\n")
         
-
+        legend_elements = [
+    Line2D([0], [0], marker='o', color='r', label='Hill Climbing',
+           markerfacecolor='red', markersize=10),
+    Line2D([0], [0], marker='o', color='b', label='Gradient Descent',
+           markerfacecolor='blue', markersize=10),
+    Line2D([0], [0], marker='o', color='g', label='Newton Method',
+           markerfacecolor='green', markersize=10)
+]
+        
+        ax.legend(handles=legend_elements, loc='upper right')
         plt.pause(5)
         plt.clf()
