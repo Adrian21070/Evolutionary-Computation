@@ -10,6 +10,13 @@ from functions import function_1, function_2, function_3
 
 
 def plot_contour(f, constraints):
+    """
+    Function to generate the contours.
+
+    @param f: Function to map.
+    @param constraints: limits of the functions.
+    """
+
     x = np.linspace(constraints[0][0], constraints[0][1], 100)
     y = np.linspace(constraints[1][0], constraints[1][1], 100)
 
@@ -56,6 +63,7 @@ if __name__ == "__main__":
     # Know optimal points
     optimalValues = [[0, 0], [-0.0898, 0.7126], [0, 0]]
     
+    # For each function ...
     for indx, f in enumerate(functions):
 
         # Extract parameters

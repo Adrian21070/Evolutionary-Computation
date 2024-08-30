@@ -3,6 +3,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def compute_gradient(x, y, f, constraint):
+    """
+    Compute the gradient with numerical derivatives.
+    
+    @param x: X value.
+    @param y: Y value.
+    @param f: Function to work with.
+    @param constraint: Limits of the function.
+    
+    :return: Gradient arround point (x,y)
+    """
     dx, dy = 1e-5, 1e-5
 
     df_dx = (f([x + dx, y], constraint) - f([x - dx, y], constraint)) / (2*dx)
@@ -11,6 +21,16 @@ def compute_gradient(x, y, f, constraint):
     return np.array([df_dx, df_dy])
 
 def compute_hessian(x, y, f, constraint):
+    """
+    Compute the hessian matrix with numerical derivatives.
+    
+    @param x: X value.
+    @param y: Y value.
+    @param f: Function to work with.
+    @param constraint: Limits of the function.
+    
+    :return: Hessian matrix arround point (x,y)
+    """
     dx, dy = 1e-5, 1e-5
 
     df_dxdx = (f([x + dx, y], constraint) - 2*f([x, y], constraint) + f([x - dx, y], constraint)) / (dx**2)
@@ -22,6 +42,19 @@ def compute_hessian(x, y, f, constraint):
 
 def hill_climbing(initial_solution, step_size, max_iterations,
                   num_neighbors, function, constraint, ax):
+    """
+    Hill climbing algorithm
+    
+    @param initial_solution: Initial solution (x,y).
+    @param step_size: Initial step size.
+    @param max_iterations: Number of iterations until break the algorithm.
+    @param num_neighbors: Number of neighbors to generate around the curren solution.
+    @param function: Function to optimize.
+    @param constrain: Limits of the function.
+    @param ax: Contour plot to draw the algorithm path.
+
+    :return: Final_point, Final point evaluated, number of iterations used.
+    """
     
     # Evaluate initial solution
     current_solution = initial_solution
@@ -81,7 +114,20 @@ def hill_climbing(initial_solution, step_size, max_iterations,
     return current_solution, function(current_solution, constraint), count_iter, count_evaluations
 
 def gradient_descent(initial_solution, step_size, f, constraint, tolerance, ax):
+    """
+    Gradient Descent algorithm
     
+    @param initial_solution: Initial solution (x,y).
+    @param step_size: Initial step size.
+    @param f: Function to optimize.
+    @param constrain: Limits of the function.
+    @param tolerance: Stop criterion.
+    @param ax: Contour plot to draw the algorithm path.
+
+    :return: Final_point, Final point evaluated,
+    number of iterations used, number of computed gradients.
+    """
+
     x = np.array(initial_solution)
 
     ax.scatter(x[0], x[1], c="b")
@@ -116,15 +162,50 @@ def gradient_descent(initial_solution, step_size, f, constraint, tolerance, ax):
     return x, f(x, constraint), cont_iter, countGradients
 
 def armijo_condition(f, point, alpha, p, grad, constraint, c1=1e-4):
+    """
+    Verify first condition of wolfe conditions.
+    
+    @param f: Function to optimize.
+    @param point: Current point.
+    @param alpha: Current step size.
+    @param p: Displacement vector.
+    @param constrain: Limits of the function.
+    @c1: Wolfe parameters.
+
+    :return: True or False.
+    """
     new_point = point + alpha * p
     return f(new_point, constraint) <= f(point, constraint) + c1 * alpha * np.dot(grad, p)
     #return f([x + alpha * p[0], y + alpha * p[1]], constraint) <= f([x,y]) + c1 * alpha * np.dot(grad, p)
 
 def curvature_condition(grad_new, p, grad, c2=0.9):
+    """
+    Verify second condition of wolfe conditions.
+
+    @param grad_new: Gradient of new point.
+    @param p: Displacement vector.
+    @param grad: Previous gradient.
+    @c2: Wolfe parameter.
+    
+    :return: True of False.
+    """
     return np.dot(grad_new, p) >= c2 * np.dot(grad, p)
 
 def wolfe_conditions(f, point, p, prev_grad, step_size, constraint, countgrad, c1=1e-4, c2=0.9):
-    
+    """
+    Update the step size.
+
+    @param f: Function to optimize.
+    @param point: Current point.
+    @param prev_grad: Current gradient (before trying new point).
+    @param step_size: Current step size.
+    @param constrain: Limits of the function.
+    @param countgrad: Counter with the number of gradients computed.
+    @param c1: Wolfe parameter 1.
+    @param c2: Wolfe parameter 2.
+
+    :return: Updated step size, number of gradients computed.
+    """
     flag = False
     count_iter = 0
     
@@ -150,10 +231,28 @@ def wolfe_conditions(f, point, p, prev_grad, step_size, constraint, countgrad, c
     return step_size, countgrad
 
 def norm(point: list) -> float:
+    """
+    Compute the euclidian norm.
+    
+    @param point: List with values.
+    """
 
     return sum([x**2 for x in point])**0.5
 
 def newton(initial_solution, step_size, f, constraint, tolerance, ax):
+    """
+    Newton Method algorithm
+    
+    @param initial_solution: Initial solution (x,y).
+    @param step_size: Initial step size.
+    @param f: Function to optimize.
+    @param constrain: Limits of the function.
+    @param tolerance: Stop criterion.
+    @param ax: Contour plot to draw the algorithm path.
+
+    :return: Final_point, Final point evaluated,
+    number of iterations used, number of computed gradients.
+    """
     
     x = np.array(initial_solution)
 
