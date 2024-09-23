@@ -174,10 +174,12 @@ def single_point_crossover(parents: list[Individual], crossover_rate: float) -> 
     random_position = random.randint(1, len(genome1)-1)
 
     # Convert to Individual
-    offspring1 = Individual(genome1[:random_position] + genome2[random_position:])
-    offspring2 = Individual(genome2[:random_position] + genome1[random_position:])
-
-    return [offspring1, offspring2]
+    if  random.random() <= crossover_rate:
+        offspring1 = Individual(genome1[:random_position] + genome2[random_position:])
+        offspring2 = Individual(genome2[:random_position] + genome1[random_position:])
+        return [offspring1, offspring2]
+    else:
+        return[parents]
 
 
 # ----MUTATION OPERATORS----
@@ -228,11 +230,10 @@ def binary_mutation(offspring: list[Individual], mutation_rate: float) -> list[I
         # Extract genome
         genome: list[float] = individual.genome
         
-        # Get a random position and a random number
+        # Get a random position
         random_position = random_position = random.randint(0, len(genome))
-        r = random.random()
         
-        if  r <= mutation_rate:
+        if  random.random() <= mutation_rate:
             if genome[random_position] == 0:
                 genome[random_position] = 1
             else:
