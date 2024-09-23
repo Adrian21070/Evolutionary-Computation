@@ -65,6 +65,10 @@ def roulette_wheel(population: list[Individual], minimize: bool) -> list[Individ
         Selected parents.
     """
 
+    # Allocate memory for parents
+    parents = []
+    num_parents = 2
+
     # Get fitness
     fitness_values = [individual.fitness for individual in population]
 
@@ -74,10 +78,21 @@ def roulette_wheel(population: list[Individual], minimize: bool) -> list[Individ
         adjusted_fitness = [max_fitness - fitness for fitness in fitness_values]
     else:
         adjusted_fitness = fitness_values
+    
+    # Wheel table
+    comulated_fitness = np.sum(adjusted_fitness)
+    probability_fitness = [(fitness_value / comulated_fitness) for fitness_value in adjusted_fitness]
+    comulated_probability = [(proba + np.sum(probability_fitness[:i]))  for i, proba  in enumerate(probability_fitness)]
+    
+    for _ in range(num_parents):
+        r = random.random()
+        
+        for i, proba in enumerate(comulated_probability):
+            if r <= proba:
+                parents.append(population[i])
+                break
 
-    # TODO: Complete function...
-    pass
-
+    return parents
 
 # ----CROSSOVER OPERATORS----
 
@@ -156,13 +171,11 @@ def single_point_crossover(parents: list[Individual], crossover_rate: float) -> 
     parent1, parent2 = parents
     genome1, genome2 = parent1.genome, parent2.genome
 
-    # Genomes are strings...
-    # TODO: Implement
-
+    random_position = random.randint(1, len(genome1)-1)
 
     # Convert to Individual
-    offspring1 = Individual(new_genome1)
-    offspring2 = Individual(new_genome2)
+    offspring1 = Individual(genome1[:random_position] + genome2[random_position:])
+    offspring2 = Individual(genome2[:random_position] + genome1[random_position:])
 
     return [offspring1, offspring2]
 
@@ -211,4 +224,18 @@ def binary_mutation(offspring: list[Individual], mutation_rate: float) -> list[I
         List with mutated offspring.
     """
 
-    pass
+    for individual in offspring:
+        # Extract genome
+        genome: list[float] = individual.genome
+        
+        # Get a random position and a random number
+        random_position = random_position = random.randint(0, len(genome))
+        r = random.random()
+        
+        if  r <= mutation_rate:
+            if genome[random_position] == 0:
+                genome[random_position] = 1
+            else:
+                genome[random_position] = 0
+
+    return offspring
