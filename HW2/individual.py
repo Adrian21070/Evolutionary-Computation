@@ -1,4 +1,5 @@
 import numpy as np
+from codec import Codec
 
 class Individual():
 
@@ -14,69 +15,7 @@ class Individual():
 
     def __repr__(self):
         return f"Individual(phenotype={self.phenotype}, fitness={self.fitness})"
-    
 
-class Codec():
-
-    def __init__(self, kind: str, precision: int, intervals: list[float, float]) -> None:
-
-        self.genome_kind = kind.lower()
-        self.precision = precision
-
-        # Compute the bit length
-        self.scale_factor = 10 ** self.precision
-        self.bit_length = int(np.log2((intervals[1] - intervals[0]) * self.scale_factor) + 0.99)
-
-    def encode(self, real_values: list[float]) -> list | str:
-        """
-        
-        """
-        if self.genome_kind == "binary":
-            # Conver each float into int
-            int_values: list[int] = [int(abs(value * self.scale_factor)) for value in real_values]
-            sign_values: list[bool] = np.sign(real_values)
-        
-            # Encode each integer to n-bit length string
-            genome: list[str] = [f"{value:0{self.bit_length}b}" for value in int_values]
-
-            # Append sign bit at the beggining of each string
-            for i in range(len(sign_values)):
-                if sign_values[i] == 1:
-                    genome[i] = "0" + genome[i]
-                else:
-                    genome[i] = "1" + genome[i]
-
-            return "".join(genome)
-        
-        elif self.genome_kind == "real":
-            return real_values
-
-    def decode(self, genome: list | str):
-        
-        if self.genome_kind == "binary":
-            # Convert from binary to real values
-            real_values = []
-
-            # Iterate over the genome with steps of self.bit_length + 1 to include sign
-            for i in range(0, len(genome), self.bit_length + 1):
-                
-                # Get chunk of len bit_length
-                binary_str = genome[i: i + self.bit_length + 1]
-
-                # Get sign
-                sign = 1 if binary_str[0] == "0" else -1
-
-                # From binary to integer
-                integer_value = int(binary_str[1:], 2)
-                
-                # Downscale by scale factor
-                real_value = sign * integer_value / self.scale_factor    
-                real_values.append(real_value)
-            
-            return real_values
-        
-        elif self.genome_kind == "real":
-            return genome
 
 class Population():
 

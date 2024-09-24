@@ -119,7 +119,7 @@ def simulated_binary_crossover(parents: list[Individual], crossover_rate: float,
     beta = np.where(u <= 0.5, lower_beta, upper_beta)
 
     # Perform SBX
-    if random.random() < crossover_rate:
+    if random.random() <= crossover_rate:
         # Perform Crossover
         new_genome1 = 0.5 * ((1 + beta) * genome1 + (1 - beta) * genome2) 
         new_genome2 = 0.5 * ((1 - beta) * genome1 + (1 + beta) * genome2) 
@@ -169,7 +169,8 @@ def single_point_crossover(parents: list[Individual], crossover_rate: float) -> 
 
 # ----MUTATION OPERATORS----
 
-def parameter_based_mutation(offspring: list[Individual], mutation_rate: float, nm: int = 20) -> list[Individual]:
+def parameter_based_mutation(offspring: list[Individual], mutation_rate: float,
+                            intervals: list[float], nm: int = 20) -> list[Individual]:
     """
     Parameters
     ----------
@@ -191,12 +192,36 @@ def parameter_based_mutation(offspring: list[Individual], mutation_rate: float, 
         # Extract genome
         genome: list[float] = individual.genome
 
-        # Perform mutation
-        pass
+        for i, value in enumerate(genome):
+            
+            # Random number to perform or not mutation.
+            if random.random() > mutation_rate:
+                continue
 
+            # Perform mutation
+            ## Get uniform value
+            u = random.random()
+
+            # Compute deltas
+            delta_max = intervals[1] - intervals[0]
+            delta = min((value - intervals[0]),(intervals[1] - value)) / delta_max
+
+            # Compute delta q
+            if u <= 0.5:
+                delta_q = (2*u + (1-2*u)*((1-delta)**(nm + 1)))**(1/(nm+1)) - 1
+            else:
+                delta_q = 1 - (2*(1-u) + 2*(u-0.5)*((1-delta)**(nm+1)))**(1/(nm+1))
+                
+            # Mutate allele
+            genome[i] = genome[i] + delta_q * delta_max
+            
+            # Done with this individual.
+            break
+        
     return offspring
 
-def binary_mutation(offspring: list[Individual], mutation_rate: float) -> list[Individual]:
+def binary_mutation(offspring: list[Individual], mutation_rate: float,
+                    intervals: list[float] | None = None) -> list[Individual]:
     """
     Parameters
     ----------

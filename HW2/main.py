@@ -1,7 +1,9 @@
 
 # Import classes and functions
+from codec import Codec
+from graphics import Graphics
 from functions import Problem
-from individual import Individual, Population, Codec
+from individual import Individual, Population
 
 # For binary representation
 from operators import roulette_wheel, single_point_crossover, binary_mutation
@@ -26,6 +28,28 @@ representation = "real"
 # Define precision (only for binary)
 precision = 4
 
+
+# Define problem
+## Problem 1
+#expression = "100*(x**2 - y**2) + (1 - x)**2"
+#variable_names = ["x", "y"]
+#intervals = [-2.048, 2.048]
+
+## Problem 2
+#expression = "rastring(x,y)"
+#variable_names = ["x", "y"]
+#intervals = [-5.12, 5.12]
+
+## Problem 3
+expression = "rastring(x,y,z,u,v)"
+variable_names = ["x", "y", "z", "u", "v"]
+intervals = [-5.12, 5.12]
+
+num_variables = len(variable_names)
+
+# Define kind of optimization
+minimize = True
+
 # Define operators
 if representation == "binary":
     selection = roulette_wheel
@@ -37,16 +61,6 @@ else:
     crossover = simulated_binary_crossover
     mutation = parameter_based_mutation
 
-# Define problem
-expression = "100*(x**2 - y**2) + (1 - x)**2"
-variable_names = ["x", "y"]
-num_variables = len(variable_names)
-
-# Define constraints
-intervals = [-2.048, 2.048]
-
-# Define kind of optimization
-minimize = False
 
 def evaluate(population: Population, problem: Problem) -> None:
     """
@@ -105,12 +119,15 @@ def step(population: Population, codec: Codec, rates: list[float]) -> list[Indiv
         offspring = crossover(parents, crossover_rate)
 
         # Mutation
-        offspring = mutation(offspring, mutation_rate)
+        offspring = mutation(offspring, mutation_rate, intervals)
 
         # Decode individuals
         for child in offspring:
             phenotype = codec.decode(child.genome)
             child.phenotype = phenotype
+        
+        # Repair (Individuals outside constraints)
+        # TODO: Not neccesary?
         
         # Append to new population
         new_population.extend(offspring)
@@ -125,7 +142,8 @@ def main():
     problem = Problem(expression, num_variables, constraints, minimize)
 
     # Initialize a codec to handle genome encodings and decodings
-    codec = Codec(kind=representation, precision=precision, intervals=intervals)
+    codec = Codec(kind=representation, num_variables=num_variables,
+                   precision=precision, constraint=intervals)
 
     #  Initialize population
     population  = Population(population_size)
@@ -134,10 +152,17 @@ def main():
     # Evaluate initial population
     evaluate(population, problem)
 
+    # Initialize graphs
+    graph = Graphics(minimize)
+    
+    if num_variables == 2:
+        graph.create_3d_plot(population, problem, intervals)
+
     # Define probabilities
     crossover_rate = 0.9
-    mutation_rate = 1 / (num_variables * (codec.bit_length + 1))
-
+    mutation_rate = 0.01 
+    #mutation_rate = 1 / (codec.num_allels)
+    
     genetic_rates = [crossover_rate, mutation_rate]
 
     for gen in range(number_of_generations):
@@ -151,13 +176,16 @@ def main():
         # Evaluate population
         evaluate(population, problem)
 
+        # Plot
+        if num_variables == 2:
+            graph.update_3d_plot(population)
+
         # Save statistics
-        fitness_values = population.get_fitness()
-        if minimize:
-            print(min(fitness_values))
-        else:
-            print(max(fitness_values))
+        best_individual, best_fitness = graph.save_best_individual(population)
         
+        print(f"Generation {gen+1:03d} - Max Fitness: {best_fitness}, Best Phenotype: {best_individual}")
+
+    graph.plot_fitness()
 
 if __name__ == "__main__":
     main()
