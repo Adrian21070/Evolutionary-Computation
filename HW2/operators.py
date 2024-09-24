@@ -260,9 +260,9 @@ def binary_mutation(offspring: list[Individual], mutation_rate: float,
             if random.random() > mutation_rate:
                 continue
             
-
             genome[index] = "0" if genome[index] == "1" else "1"
-        
+            break
+
         # Join the genome list.
         genome_str: str = "".join(genome)
 
