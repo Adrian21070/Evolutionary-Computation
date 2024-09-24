@@ -80,14 +80,14 @@ def roulette_wheel(population: list[Individual], minimize: bool) -> list[Individ
         adjusted_fitness = fitness_values
     
     # Wheel table
-    comulated_fitness = np.sum(adjusted_fitness)
-    probability_fitness = [(fitness_value / comulated_fitness) for fitness_value in adjusted_fitness]
-    comulated_probability = [(proba + np.sum(probability_fitness[:i]))  for i, proba  in enumerate(probability_fitness)]
+    cumulated_fitness = np.sum(adjusted_fitness)
+    probability_fitness = [(fitness_value / cumulated_fitness) for fitness_value in adjusted_fitness]
+    cumulated_probability = [(proba + np.sum(probability_fitness[:i]))  for i, proba  in enumerate(probability_fitness)]
     
     for _ in range(num_parents):
         r = random.random()
         
-        for i, proba in enumerate(comulated_probability):
+        for i, proba in enumerate(cumulated_probability):
             if r <= proba:
                 parents.append(population[i])
                 break
@@ -179,7 +179,7 @@ def single_point_crossover(parents: list[Individual], crossover_rate: float) -> 
         offspring2 = Individual(genome2[:random_position] + genome1[random_position:])
         return [offspring1, offspring2]
     else:
-        return[parents]
+        return parents
 
 
 # ----MUTATION OPERATORS----
@@ -253,8 +253,24 @@ def binary_mutation(offspring: list[Individual], mutation_rate: float,
 
     for individual in offspring:
         # Extract genome
-        genome: list[float] = individual.genome
+        genome: list[str] = list(individual.genome)
+
+        for index in range(len(genome)):
+
+            if random.random() > mutation_rate:
+                continue
+            
+
+            genome[index] = "0" if genome[index] == "1" else "1"
         
+        # Join the genome list.
+        genome_str: str = "".join(genome)
+
+        # Update the genome
+        individual.genome = genome_str
+
+    return offspring
+    """
         # Get a random position
         random_position = random_position = random.randint(0, len(genome))
         
@@ -265,3 +281,4 @@ def binary_mutation(offspring: list[Individual], mutation_rate: float,
                 genome[random_position] = 0
 
     return offspring
+    """

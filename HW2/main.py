@@ -16,14 +16,13 @@ from operators import binary_tournament, simulated_binary_crossover, parameter_b
 # TODO: +-Infinite fitness, but in selection, should I dispose them?
 
 # TODO: Some genotypes allows phenotypes outside constraints (Which is correct).
-# TODO: Mutation should skip sign bits (Binary Encoding)?
 
 # Define parameters
 population_size = 100
 number_of_generations = 100
 
 # Define representation
-representation = "real"
+representation = "binary"
 
 # Define precision (only for binary)
 precision = 4
@@ -36,14 +35,14 @@ precision = 4
 #intervals = [-2.048, 2.048]
 
 ## Problem 2
-#expression = "rastring(x,y)"
-#variable_names = ["x", "y"]
-#intervals = [-5.12, 5.12]
+expression = "rastring(x,y)"
+variable_names = ["x", "y"]
+intervals = [-5.12, 5.12]
 
 ## Problem 3
-expression = "rastring(x,y,z,u,v)"
-variable_names = ["x", "y", "z", "u", "v"]
-intervals = [-5.12, 5.12]
+#expression = "rastring(x,y,z,u,v)"
+#variable_names = ["x", "y", "z", "u", "v"]
+#intervals = [-5.12, 5.12]
 
 num_variables = len(variable_names)
 
@@ -160,8 +159,8 @@ def main():
 
     # Define probabilities
     crossover_rate = 0.9
-    mutation_rate = 0.01 
-    #mutation_rate = 1 / (codec.num_allels)
+    #mutation_rate = 0.01 
+    mutation_rate = 1 / (codec.num_allels)
     
     genetic_rates = [crossover_rate, mutation_rate]
 
