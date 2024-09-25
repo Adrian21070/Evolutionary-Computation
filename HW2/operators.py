@@ -1,8 +1,9 @@
 
 import random
 import numpy as np
-
 from individual import Individual
+
+from typing import Union, Optional
 
 # ----SELECTION OPERATORS----
 
@@ -236,7 +237,7 @@ def parameter_based_mutation(offspring: list[Individual], mutation_rate: float,
     return offspring
 
 def binary_mutation(offspring: list[Individual], mutation_rate: float,
-                    intervals: list[float] | None = None) -> list[Individual]:
+                    intervals: Optional[list[float]] = None) -> list[Individual]:
     """
     Parameters
     ----------
@@ -270,15 +271,3 @@ def binary_mutation(offspring: list[Individual], mutation_rate: float,
         individual.genome = genome_str
 
     return offspring
-    """
-        # Get a random position
-        random_position = random_position = random.randint(0, len(genome))
-        
-        if  random.random() <= mutation_rate:
-            if genome[random_position] == 0:
-                genome[random_position] = 1
-            else:
-                genome[random_position] = 0
-
-    return offspring
-    """

@@ -1,6 +1,8 @@
 
 import numpy as np
 
+from typing import Union, Optional
+
 class Codec():
 
     def __init__(self, kind: str, num_variables: int, precision: int,
@@ -43,7 +45,7 @@ class Codec():
         # Compute the max representative number
         self.max_representation = 2 ** self.bit_length - 1
 
-    def encode(self, real_values: list[float]) -> list[float] | str:
+    def encode(self, real_values: list[float]) -> Union[list[float], str]:
         """
         Parameters
         ----------
@@ -72,7 +74,7 @@ class Codec():
             # Real encoding
             return real_values
         
-    def decode(self, genome: list[float] | str) -> list[float]:
+    def decode(self, genome: Union[list[float], str]) -> list[float]:
         """
         Parameters
         ----------

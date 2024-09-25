@@ -2,8 +2,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from typing import Union, Optional
+
 # Functions to evaluate
-def rastring(*args) -> float | np.ndarray:
+def rastring(*args) -> Union[float, np.ndarray]:
     
     A = 10
     n = len(args)
@@ -29,7 +31,7 @@ class Problem():
         self.minimize = minimize
         self.constraints = constraints
 
-    def evaluate(self, **variables) -> float | np.ndarray:
+    def evaluate(self, **variables) -> Union[float, np.ndarray]:
         
         if not self._check_constraints(variables):
             if self.minimize:
@@ -49,7 +51,7 @@ class Problem():
         except Exception as e:
             raise ValueError(f"Variable not provided. {e}")
         
-    def _check_constraints(self, variables: dict[str, float|np.ndarray]) -> bool:
+    def _check_constraints(self, variables: dict[str, Union[float, np.ndarray]]) -> bool:
 
         for i, (var_name, value) in enumerate(variables.items()):
             if i < len(self.constraints):

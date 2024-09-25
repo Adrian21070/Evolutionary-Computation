@@ -1,14 +1,16 @@
 import numpy as np
 from codec import Codec
 
+from typing import Union, Optional
+
 class Individual():
 
-    def __init__(self, genome: list[float] |  str) -> None:
+    def __init__(self, genome: Union[list[float], str]) -> None:
         
         self.genome = genome
-        self.phenotype: list[float] | None = None
+        self.phenotype: Optional[list[float]] = None
 
-        self.fitness: float|None = None
+        self.fitness: Optional[float] = None
 
     def set_phenotype(self, phenotype: list[float]) -> None:
         self.phenotype = phenotype
@@ -35,7 +37,7 @@ class Population():
             random_list: list[float] = (np.random.rand(num_variables) * interval + intervals[0]).tolist()
 
             # Encode the random list to get the genome
-            genome: list[float] | str = codec.encode(random_list)
+            genome: Union[list[float], str] = codec.encode(random_list)
 
             # Create an individual
             individual = Individual(genome)
